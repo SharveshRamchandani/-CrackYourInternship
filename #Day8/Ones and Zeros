@@ -1,0 +1,50 @@
+class Solution {
+    public int findMaxForm(String[] strs, int m, int n) {
+        int[][][] dp = new int[strs.length + 1][m + 1][n + 1];
+        //dp[i][j][k]代表前i个字符串，最多j个0和k个1的最大子集个数
+        int oneCount = 0;
+        int zeroCount = 0;
+        //i从1开始，因为如果i=0，dp[i][j][k] = 0；
+        for(int i = 1; i < strs.length + 1; ++i) {
+            String str = strs[i - 1];
+            int[] count = count(str);
+            //计算前i个字符串中0的总个数和1的总个数
+            zeroCount += count[0];
+            oneCount += count[1];
+            for(int j = 0; j < m + 1; ++j) {
+                for(int k = 0; k < n + 1; ++k) {
+                    if (j == 0 && k == 0) {
+                        // i > 0，此时zeroCount > 0 || oneCount > 0
+                        dp[i][j][k] = 0;
+                    }
+                    else if (zeroCount <= j && oneCount <= k) {
+                        //前面i个字符串全部放入背包后，满足条件
+                        dp[i][j][k] = i;
+                    }
+                    else if (j >= count[0] && k >= count[1]){
+                        //第i个字符串0的个数小于等于j，并且1的个数小于等于k
+                        dp[i][j][k] = 
+                            Math.max(dp[i - 1][j][k],  //第i个字符串不放入背包
+                                    /*第i个字符串放入背包之后*/dp[i - 1][j - count[0]][k - count[1]] + 1);
+                    }
+                    else {
+                        dp[i][j][k] = dp[i - 1][j][k];
+                    }
+                } 
+            }   
+        }
+        
+        return dp[strs.length][m][n];
+        
+    }
+    
+    private int[] count(String str) {
+        int[] res = new int[2];
+        for (char c : str.toCharArray()) {
+            if (c == '0') res[0]++;
+            else res[1]++;
+        }
+        
+        return res;
+    }
+}
